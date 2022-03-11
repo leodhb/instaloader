@@ -102,7 +102,7 @@ class NodeIterator(Iterator[T]):
                     self._query_hash, {**self._query_variables, **pagination_variables}, self._query_referer
                 )
             )
-            self._best_before = datetime.now() + NodeIterator._shelf_life
+            # self._best_before = datetime.now() + NodeIterator._shelf_life
             return data
         except QueryReturnedBadRequestException:
             new_page_length = int(NodeIterator._graphql_page_length / 2)
@@ -120,6 +120,9 @@ class NodeIterator(Iterator[T]):
     def __next__(self) -> T:
         if self._page_index < len(self._data['edges']):
             node = self._data['edges'][self._page_index]['node']
+            timestamp = self._data['edges'][self._page_index]['node']['taken_at_timestamp']
+            limit = datetime.now() - timedelta(days=39)
+
             page_index, total_index = self._page_index, self._total_index
             try:
                 self._page_index += 1
@@ -130,7 +133,12 @@ class NodeIterator(Iterator[T]):
             item = self._node_wrapper(node)
             if self._first_node is None:
                 self._first_node = node
-            return item
+            
+            if timestamp > limit.timestamp():
+                return item
+            else:
+                raise StopIteration()
+
         if self._data['page_info']['has_next_page']:
             query_response = self._query(self._data['page_info']['end_cursor'])
             if self._data['edges'] != query_response['edges']:
