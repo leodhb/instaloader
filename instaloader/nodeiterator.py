@@ -121,7 +121,7 @@ class NodeIterator(Iterator[T]):
         if self._page_index < len(self._data['edges']):
             node = self._data['edges'][self._page_index]['node']
             timestamp = self._data['edges'][self._page_index]['node']['taken_at_timestamp']
-            limit = datetime.now() - timedelta(days=39)
+            limit = datetime.now() - timedelta(days=30)
 
             page_index, total_index = self._page_index, self._total_index
             try:
