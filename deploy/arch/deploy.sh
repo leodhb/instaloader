@@ -8,10 +8,12 @@ echo $VERSION | grep -qe "[abc]" && exit 0
 cd $(dirname $0)
 
 # decrypt and add ssh key
-openssl aes-256-cbc -K $encrypted_354637631c28_key -iv $encrypted_354637631c28_iv -in id_rsa_AUR.enc -out /tmp/AUR_openssh -d
+openssl aes-256-cbc -K $AUR_KEY -iv $AUR_IV -in id_rsa_AUR.enc -out /tmp/AUR_openssh -d
 eval "$(ssh-agent -s)"
 chmod 600 /tmp/AUR_openssh
 ssh-add /tmp/AUR_openssh
+mkdir -p ~/.ssh
+ssh-keyscan -t rsa aur.archlinux.org >> ~/.ssh/known_hosts
 
 # clone and modify AUR repo
 git clone --depth 1 ssh://aur@aur.archlinux.org/instaloader.git
